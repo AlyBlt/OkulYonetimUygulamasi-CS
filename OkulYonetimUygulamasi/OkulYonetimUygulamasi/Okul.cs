@@ -8,8 +8,7 @@ namespace OkulYonetimUygulamasi
 {
     internal class Okul
     {
-        // Okula ait herhnagi bir bir bilginin değiştirilmesi gerektiğinde, ilgili işlemler bu sınıfta yapılmalı.
-
+       
         public List<Ogrenci> Ogrenciler = new List<Ogrenci>();
 
 
@@ -17,31 +16,52 @@ namespace OkulYonetimUygulamasi
         {
             // Ogrenci oluşacak
 
-            Ogrenci o = new Ogrenci();
+            Ogrenci ogrenci = new Ogrenci();
 
-            o.No = no;
-            o.Ad = ad;
-            //
-            //
-            //
-            //
-
-
-            this.Ogrenciler.Add(o);
+            ogrenci.No = no;
+            ogrenci.Ad = ad;
+            ogrenci.Soyad = soyad;
+            ogrenci.DogumTarihi = dogumTarihi;
+            ogrenci.Cinsiyet = cinsiyet;
+            ogrenci.Sube = sube;
+            
+            Ogrenciler.Add(ogrenci);
         }
 
+        public void OgrenciSil(int no)
+        {
+            Ogrenci ogrenci = this.Ogrenciler.Where(x => x.No == no).FirstOrDefault();
+
+            if (ogrenci != null)
+            {
+                Ogrenciler.Remove(ogrenci);
+            }
+        }
         public void NotEkle(int no, string ders, int not)
         {
-            Ogrenci o = this.Ogrenciler.Where(x => x.No == no).FirstOrDefault();
+            Ogrenci ogrenci = this.Ogrenciler.Where(x => x.No == no).FirstOrDefault();
 
-            if (o != null)
+            if (ogrenci != null)
             {
-                //DersNotu dn = new DersNotu(ders,not);
+               ogrenci.Notlar.Add(  new DersNotu(ders, not)  );
+            }
+        }
 
-                //o.Notlar.Add(dn);
+        public void KitapEkle(int no, string kitapAdi)
+        {
+            Ogrenci ogrenci = this.Ogrenciler.Where(x => x.No == no).FirstOrDefault();
+            if (ogrenci != null)
+            {
+                ogrenci.KitapEkle(kitapAdi);
+            }
+        }
 
-
-                o.Notlar.Add(  new DersNotu(ders, not)  );
+        public void AdresEkle(int no, string il, string ilce, string mahalle)
+        {
+            Ogrenci ogrenci = this.Ogrenciler.Where(a => a.No == no).FirstOrDefault();
+            if (ogrenci != null)
+            {
+                ogrenci.AdresEkle(il, ilce, mahalle);
             }
         }
     }

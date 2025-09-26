@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace OkulYonetimUygulamasi
 {
-    internal class Adres
+    internal class Yardimci
     {
-        public string Il;
-        public string Ilce;
-        public string Mahalle;
+        
     }
 }
