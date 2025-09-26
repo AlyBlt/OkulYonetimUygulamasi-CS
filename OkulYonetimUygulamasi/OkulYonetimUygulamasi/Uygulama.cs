@@ -61,19 +61,19 @@ namespace OkulYonetimUygulamasi
                         ButunOgrenciListele();
                         break;
                     case "2":
-                        //SubeyeGoreOgrenciListele();
+                        SubeyeGoreOgrenciListele();
                         break;
                     case "3":
-                        //CinsiyeteGoreOgrenciListele();
+                        CinsiyeteGoreOgrenciListele();
                         break;
                     case "4":
-                        //DogumTarihineGoreOgrenciListele();
+                        DogumTarihineGoreOgrenciListele();
                         break;
                     case "5":
-                        //IllereGoreOgrenciListele();
+                        IllereGoreOgrenciListele();
                         break;
                     case "6":
-                        //OgrencininTumNotListele();
+                        OgrencininTumNotListele();
                         break;
                     case "7":
                         //OgrencininKitaplariListele();
@@ -115,7 +115,7 @@ namespace OkulYonetimUygulamasi
                         //OgrencininOkuduguKitabiGir();
                         break;
                     case "20":
-                        //OgrenciNotuGir();
+                        OgrenciNotuGir();
                         break;
                     case "ÇIKIŞ":
                     case "CİKİS":
@@ -128,7 +128,7 @@ namespace OkulYonetimUygulamasi
                         break;
                     default:
                         Console.WriteLine("\nHatalı işlem gerçekleştirildi. Tekrar deneyin.");
-                        Console.WriteLine("\nMenüyü tekrar listelemek için \"liste\", çıkış yapmak için \"çıkış\" yazın.");
+                        Yardimci.ListeCikis();
                         sayac++;
                         break;
                 }
@@ -142,37 +142,102 @@ namespace OkulYonetimUygulamasi
         }
        
 
-        public void BaslikYazdir(string baslik)
-        {
-            Console.WriteLine("\n1-" + baslik + "---------------------------------------------------------------------------------\n");
-        }
-
         public void ButunOgrenciListele()
         {
-            BaslikYazdir("Bütün Öğrencileri Listele");
-
-            Console.WriteLine("Şube".PadRight(15) + "No".PadRight(15) + "Adı".PadRight(5) + "Soyadı".PadRight(20) + "Not Ort.".PadRight(15) + "Okuduğu Kitap Say.");
-            Console.WriteLine("------------------------------------------------------------------------------------------------------------");
-
-            foreach (Ogrenci ogrenci in okul.Ogrenciler )
+            if (!Yardimci.OgrenciVarMi(okul))
             {
-                Console.WriteLine(ogrenci.Sube.ToString().PadRight(15) + ogrenci.No.ToString().PadRight(15) + (ogrenci.Ad + " " + 
-                    ogrenci.Soyad).PadRight(25) + ogrenci.Ortalama.ToString("0.00").PadRight(15) + ogrenci.KitapSayisi); 
+                Console.WriteLine("\nHenüz sisteme kayıtlı öğrenci yok.");
+                return;
+            }
+
+            Yardimci.OgrenciListele(okul.Ogrenciler, 1, "Bütün Öğrencileri Listele");
+        }
+
+        public void SubeyeGoreOgrenciListele()
+        {
+            Console.Write("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            string subebilgisi = Console.ReadLine().ToUpper();
+
+            if (Enum.TryParse<SUBE>(subebilgisi, out SUBE sube))
+            {
+                var liste = Yardimci.OgrenciBulSube(okul, sube);
+
+                if (liste.Count == 0)
+                {
+                    Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                }
+                else
+                {
+                    Yardimci.OgrenciListele(liste,2, "Şubeye Göre Öğrenci Listele");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Hatalı şube girdiniz.");
+            }
+        }
+
+        public void CinsiyeteGoreOgrenciListele()
+        {
+            Console.Write("Listelemek istediğiniz cinsiyeti girin (K/E): ");
+            string cinsiyetBilgisi = Console.ReadLine().ToUpper();
+               
+            while (cinsiyetBilgisi != "K" && cinsiyetBilgisi != "E")
+            
+            { 
+                    Console.WriteLine("Hatalı giriş yaptınız. Lütfen sadece K veya E girin.");
+                    cinsiyetBilgisi=Console.ReadLine().ToUpper();
+                
+            }
+
+            CINSIYET cinsiyet = (cinsiyetBilgisi == "K") ? CINSIYET.Kiz : CINSIYET.Erkek;
+
+            var liste = okul.Ogrenciler.Where(o => o.Cinsiyet == cinsiyet).ToList();
+
+            if (liste.Count == 0)
+            {
+                Console.WriteLine($"\nSistemde hiç {(cinsiyet == CINSIYET.Kiz ? "Kız" : "Erkek")} öğrenci bulunmamaktadır.");
+                return;
+            }
+
+            Yardimci.OgrenciListele(liste, 3, "Cinsiyete Göre Öğrenciler");
+        }
+        public void DogumTarihineGoreOgrenciListele()
+        {
+            Console.Write("Hangi tarihten sonraki ögrencileri listelemek istersiniz (örn. 01.01.2000): ");
+            string girilenTarih = Console.ReadLine();
+
+            DateTime dogumTarihBilgisi;
+            bool basariliMi = DateTime.TryParse(girilenTarih, out dogumTarihBilgisi);
+
+            while (!basariliMi)
+            {
+                Console.WriteLine("Geçersiz tarih formatı. Lütfen tekrar deneyin (örn. 01.01.2000): ");
+                girilenTarih = Console.ReadLine();
+                basariliMi = DateTime.TryParse(girilenTarih, out dogumTarihBilgisi);
+            }
+            // Listeleme:
+            var liste = okul.Ogrenciler.Where(o => o.DogumTarihi > dogumTarihBilgisi).ToList();
+
+            if (liste.Count == 0)
+            {
+                Console.WriteLine($"\n{dogumTarihBilgisi:dd.MM.yyyy} tarihinden sonra doğmuş öğrenci bulunmamaktadır.");
+                return;
             }
 
 
-
+            Yardimci.OgrenciListele(liste, 4, "Dogum Tarihine Göre Ögrencileri Listele");
         }
-        //public void SubeyeGoreOgrenciListele()
-        //{ }
-        //public void CinsiyeteGoreOgrenciListele()
-        //{ }
-        //public void DogumTarihineGoreOgrenciListele()
-        //{ }
-        //public void IllereGoreOgrenciListele()
-        //{ }
-        //public void OgrencininTumNotListele()
-        //{ }
+
+        public void IllereGoreOgrenciListele()
+        {
+       
+            Yardimci.OgrenciListele1(5);
+        }
+        public void OgrencininTumNotListele()
+        {
+             Yardimci.OgrenciListele2(6);
+        }
         //public void OgrencininKitaplariListele()
         //{ }
         //public void OkuldaEnYuksekNotlu5Listele()
@@ -201,36 +266,58 @@ namespace OkulYonetimUygulamasi
         //public void OgrencininOkuduguKitabiGir()
         //{ }
 
-       
+
         public void OgrenciNotuGir()
         {
 
             try
             {
-                BaslikYazdir("Not Gir");
+                Yardimci.BaslikYazdir(20,"Not Gir");
 
-                Console.Write("Öğrenci numarası : ");
+                Console.Write("Öğrenci numarası: ");
                 int no = int.Parse(Console.ReadLine());
 
-                // bu numaralı öğrenci bulunup bilgileri ekrana yazılacak.
+                var ogrenci = Yardimci.OgrenciBulNo(okul, no);
 
-                //
+                if (ogrenci == null)
+                {
+                    Console.WriteLine("Bu numaraya ait bir öğrenci bulunamadı.");
+                    return;
+                }
+
+                else
+                {
+
+                    Console.WriteLine("Öğrencinin Adı Soyadı: " + ogrenci.Ad + " " + ogrenci.Soyad);
+                    Console.WriteLine("Öğrencinin Şubesi: " + ogrenci.Sube);
+                }
+                               
+                Console.Write("Not eklemek istediğiniz ders: ");
                 string ders = Console.ReadLine();
-
-                // 
+                Console.Write("Eklemek istediginiz not adedi: ");
                 int adet = int.Parse(Console.ReadLine());
 
                 for (int i = 1; i <= adet; i++)
                 {
-                    Console.Write(i + ". notu girin: ");
-                    int not = int.Parse(Console.ReadLine());
-                    //Okul.NotEkle(no, ders, not);
-                }
+                    int not;
+                    while (true)
+                    {
+                        Console.Write(i + ". notu girin (0-100): ");
+                        if (int.TryParse(Console.ReadLine(), out not) && not >= 0 && not <= 100)
+                            break;
 
+                        Console.WriteLine("Geçersiz değer! Lütfen 0 ile 100 arasında bir sayı girin.");
+                    }
+                 
+
+                    okul.NotEkle(no, ders, not);
+                }
+                Console.WriteLine("\nNot(lar) başarıyla eklendi.");
+                Yardimci.ListeCikis();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("\nHata: " + e.Message);
             }
 
         }
@@ -287,7 +374,16 @@ namespace OkulYonetimUygulamasi
 
         public void SahteNotEkle()
         {
-
+            okul.NotEkle(1, "Türkçe", 22); okul.NotEkle(1, "Matematik", 23); okul.NotEkle(1, "Fen", 66); okul.NotEkle(1, "Sosyal", 40);
+            okul.NotEkle(2, "Türkçe", 87); okul.NotEkle(2, "Matematik", 14); okul.NotEkle(2, "Fen", 37); okul.NotEkle(2, "Sosyal", 93);
+            okul.NotEkle(3, "Türkçe", 67); okul.NotEkle(3, "Matematik", 39); okul.NotEkle(3, "Fen", 11); okul.NotEkle(3, "Sosyal", 47);
+            okul.NotEkle(4, "Türkçe", 55); okul.NotEkle(4, "Matematik", 23); okul.NotEkle(4, "Fen", 94); okul.NotEkle(4, "Sosyal", 21);
+            okul.NotEkle(5, "Türkçe", 85); okul.NotEkle(5, "Matematik", 87); okul.NotEkle(5, "Fen", 12); okul.NotEkle(5, "Sosyal", 73);
+            okul.NotEkle(6, "Türkçe", 67); okul.NotEkle(6, "Matematik", 87); okul.NotEkle(6, "Fen", 81); okul.NotEkle(6, "Sosyal", 22);
+            okul.NotEkle(7, "Türkçe", 2);  okul.NotEkle(7, "Matematik", 54); okul.NotEkle(7, "Fen", 69); okul.NotEkle(7, "Sosyal", 84);
+            okul.NotEkle(8, "Türkçe", 63); okul.NotEkle(8, "Matematik", 38); okul.NotEkle(8, "Fen", 53); okul.NotEkle(8, "Sosyal", 41);
+            okul.NotEkle(9, "Türkçe", 13); okul.NotEkle(9, "Matematik", 72); okul.NotEkle(9, "Fen", 44); okul.NotEkle(9, "Sosyal", 22);
+            okul.NotEkle(10, "Türkçe", 5); okul.NotEkle(10, "Matematik",35); okul.NotEkle(10,"Fen", 92); okul.NotEkle(10, "Sosyal", 61);
         }
 
 
