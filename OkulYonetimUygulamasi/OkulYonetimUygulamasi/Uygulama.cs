@@ -76,25 +76,25 @@ namespace OkulYonetimUygulamasi
                         OgrencininTumNotListele();
                         break;
                     case "7":
-                        //OgrencininKitaplariListele();
+                        OgrencininKitaplariListele();
                         break;
                     case "8":
-                        //OkuldaEnYuksekNotlu5Listele();
+                        OkuldaEnYuksekNotlu5Listele();
                         break;
                     case "9":
-                        //OkuldaEnDusukNotlu3Listele();
+                        OkuldaEnDusukNotlu3Listele();
                         break;
                     case "10":
-                        //SubedeEnYuksekNotlu5Listele();
+                        SubedeEnYuksekNotlu5Listele();
                         break;
                     case "11":
-                        //SubedeEnDusukNotlu3Listele();
+                        SubedeEnDusukNotlu3Listele();
                         break;
                     case "12":
-                        //OgrencininNotOrtalamasiGor();
+                        OgrencininNotOrtalamasiGor();
                         break;
                     case "13":
-                        //SubeninNotOrtalamasiGor();
+                        SubeninNotOrtalamasiGor();
                         break;
                     case "14":
                         //OgrencininOkuduguSonKitapGor();
@@ -155,6 +155,7 @@ namespace OkulYonetimUygulamasi
 
         public void SubeyeGoreOgrenciListele()
         {
+            Yardimci.BaslikYazdir(2, "Şubeye Göre Öğrenci Listele");
             Console.Write("Listelemek istediğiniz şubeyi girin (A/B/C): ");
             string subebilgisi = Console.ReadLine().ToUpper();
 
@@ -168,7 +169,8 @@ namespace OkulYonetimUygulamasi
                 }
                 else
                 {
-                    Yardimci.OgrenciListele(liste,2, "Şubeye Göre Öğrenci Listele");
+                    Console.WriteLine();
+                    Yardimci.OgrenciListele(liste,2, "Şubeye Göre Öğrenci Listele", false);
                 }
             }
             else
@@ -179,6 +181,7 @@ namespace OkulYonetimUygulamasi
 
         public void CinsiyeteGoreOgrenciListele()
         {
+            Yardimci.BaslikYazdir(3, "Cinsiyete Göre Öğrenciler");
             Console.Write("Listelemek istediğiniz cinsiyeti girin (K/E): ");
             string cinsiyetBilgisi = Console.ReadLine().ToUpper();
                
@@ -200,10 +203,11 @@ namespace OkulYonetimUygulamasi
                 return;
             }
 
-            Yardimci.OgrenciListele(liste, 3, "Cinsiyete Göre Öğrenciler");
+            Yardimci.OgrenciListele(liste, 3, "Cinsiyete Göre Öğrenciler", false);
         }
         public void DogumTarihineGoreOgrenciListele()
         {
+            Yardimci.BaslikYazdir(4, "Dogum Tarihine Göre Ögrencileri Listele");
             Console.Write("Hangi tarihten sonraki ögrencileri listelemek istersiniz (örn. 01.01.2000): ");
             string girilenTarih = Console.ReadLine();
 
@@ -225,8 +229,8 @@ namespace OkulYonetimUygulamasi
                 return;
             }
 
-
-            Yardimci.OgrenciListele(liste, 4, "Dogum Tarihine Göre Ögrencileri Listele");
+            Console.WriteLine();
+            Yardimci.OgrenciListele(liste, 4, "Dogum Tarihine Göre Ögrencileri Listele", false);
         }
 
         public void IllereGoreOgrenciListele()
@@ -238,20 +242,126 @@ namespace OkulYonetimUygulamasi
         {
              Yardimci.OgrenciListele2(6);
         }
-        //public void OgrencininKitaplariListele()
-        //{ }
-        //public void OkuldaEnYuksekNotlu5Listele()
-        //{ }
-        //public void OkuldaEnDusukNotlu3Listele()
-        //{ }
-        //public void SubedeEnYuksekNotlu5Listele()
-        //{ }
-        //public void SubedeEnDusukNotlu3Listele()
-        //{ }
-        //public void OgrencininNotOrtalamasiGor()
-        //{ }
-        //public void SubeninNotOrtalamasiGor()
-        //{ }
+        public void OgrencininKitaplariListele()
+        {
+            Yardimci.OgrenciListele3(7);
+        }
+        public void OkuldaEnYuksekNotlu5Listele()
+        {
+            List<Ogrenci>liste=okul.Ogrenciler.OrderByDescending(a=>a.Ortalama).Take(5).ToList();
+            Yardimci.OgrenciListele(liste, 8, "Okuldaki en başarılı 5 öğrenciyi listele");
+        }
+        public void OkuldaEnDusukNotlu3Listele()
+        {
+            List<Ogrenci> liste = okul.Ogrenciler.OrderBy(a => a.Ortalama).Take(3).ToList();
+            Yardimci.OgrenciListele(liste, 9, "Okuldaki en başarısız 3 öğrenciyi listele");
+        }
+        public void SubedeEnYuksekNotlu5Listele()
+        {
+            Yardimci.BaslikYazdir(10, "Şubedeki en başarılı 5 ögrenciyi listele");
+            Console.Write("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            string subebilgisi = Console.ReadLine().ToUpper();
+            if (Enum.TryParse<SUBE>(subebilgisi, out SUBE sube))
+            {
+                var liste = Yardimci.OgrenciBulSube(okul, sube);
+                var subeliste=liste.OrderByDescending(a=>a.Ortalama).Take(5).ToList();
+
+                if (subeliste.Count == 0)
+                {
+                    Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                }
+               
+                else
+                {
+                    Console.WriteLine();
+                    Yardimci.OgrenciListele(subeliste, 10, "Şubedeki en başarılı 5 ögrenciyi listele", false);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Hatalı şube girdiniz.");
+            }
+        }
+        public void SubedeEnDusukNotlu3Listele()
+        {
+            Yardimci.BaslikYazdir(11, "Şubedeki en başarısız 3 öğrenciyi listele");
+            Console.Write("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            string subebilgisi = Console.ReadLine().ToUpper();
+            if (Enum.TryParse<SUBE>(subebilgisi, out SUBE sube))
+            {
+                var liste = Yardimci.OgrenciBulSube(okul, sube);
+                var subeliste = liste.OrderBy(a => a.Ortalama).Take(3).ToList();
+
+                if (subeliste.Count == 0)
+                {
+                    Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                }
+
+                else
+                {
+                    Console.WriteLine();
+                    Yardimci.OgrenciListele(subeliste, 11, "Şubedeki en başarısız 3 öğrenciyi listele", false);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Hatalı şube girdiniz.");
+            }
+        }
+        public void OgrencininNotOrtalamasiGor()
+        {
+            Yardimci.BaslikYazdir(12, "Ögrencinin Not Ortalamasını Gör");
+            Console.Write("Öğrencinin numarası: ");
+            string numara = Console.ReadLine();
+
+            if (int.TryParse(numara, out int sayi))
+            {
+                var ogrenci = Yardimci.OgrenciBulNo(okul, sayi);
+                if (ogrenci == null)
+                {
+                    Console.WriteLine("\nBu numarada bir öğrenci bulunmamaktadır.");
+                    return;
+                }
+
+                Console.WriteLine("\nÖğrencinin Adı Soyadı: " + ogrenci.Ad + " " + ogrenci.Soyad);
+                Console.WriteLine("Öğrencinin Şubesi: " + ogrenci.Sube.ToString());
+
+                Console.WriteLine("\nÖgrencinin not ortalaması:" + ogrenci.Ortalama);
+                Yardimci.ListeCikis();
+            }
+            else
+            {
+                Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
+            }
+         
+        }
+        public void SubeninNotOrtalamasiGor()
+        {
+            Yardimci.BaslikYazdir(13, "Şubenin Not Ortalamasını Gör");
+            Console.Write("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            string subebilgisi = Console.ReadLine().ToUpper();
+            if (Enum.TryParse<SUBE>(subebilgisi, out SUBE sube))
+            {
+                var liste = Yardimci.OgrenciBulSube(okul, sube);
+                double ortalama=liste.Average(a => a.Ortalama);
+
+                if (liste.Count == 0)
+                {
+                    Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                }
+
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine(subebilgisi + " şubesinin not ortalaması: " + ortalama);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Hatalı şube girdiniz.");
+            }
+        
+        }
         //public void OgrencininOkuduguSonKitapGor()
         //{ }
         //public void OgrenciEkle()
