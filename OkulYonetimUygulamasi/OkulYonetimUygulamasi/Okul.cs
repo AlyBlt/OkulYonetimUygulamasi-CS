@@ -37,6 +37,21 @@ namespace OkulYonetimUygulamasi
                 Ogrenciler.Remove(ogrenci);
             }
         }
+
+        public void OgrenciGuncelle(int no, string ad, string soyAd, DateTime dogumTarihi, CINSIYET cinsiyet, SUBE sube)
+        {
+            Ogrenci ogrenci = this.Ogrenciler.Where(x => x.No == no).FirstOrDefault();
+
+            if (ogrenci != null)
+            {
+                ogrenci.No = no;
+                ogrenci.Ad = ad;
+                ogrenci.Soyad = soyAd;
+                ogrenci.DogumTarihi = dogumTarihi;
+                ogrenci.Cinsiyet = cinsiyet;
+                ogrenci.Sube = sube;
+            }
+        }
         public void NotEkle(int no, string ders, int not)
         {
             Ogrenci ogrenci = this.Ogrenciler.Where(x => x.No == no).FirstOrDefault();

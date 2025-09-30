@@ -145,7 +145,104 @@ namespace OkulYonetimUygulamasi
         {
             return okul.Ogrenciler != null && okul.Ogrenciler.Any();
         }
-        
+
+        public static SUBE SubeKontrol(string subeIstek)
+        {
+            while (true)
+            {
+                Console.Write(subeIstek);
+                string subebilgisi = Console.ReadLine().ToUpper();
+                Enum.TryParse<SUBE>(subebilgisi, out SUBE sube);
+                if (!Enum.TryParse<SUBE>(subebilgisi, out sube) || int.TryParse(subebilgisi, out int sayi))
+                {
+                    Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
+                    continue;
+                }
+                return sube;
+            }
+        }
+
+        public static int OgrenciNoKontrol()
+        {
+            while (true)
+            {
+                Console.Write("Öğrencinin numarası: ");
+                string numara = Console.ReadLine();
+                if (!int.TryParse(numara, out int sayi))
+                {
+                    Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
+                    continue;
+                }
+                
+                return sayi;
+            }
+            
+        }
+
+        public static CINSIYET CinsiyetKontrol(string cinsiyetIstek)
+        {
+            while (true)
+            {
+
+                Console.Write(cinsiyetIstek);
+                string cinsiyetBilgisi = Console.ReadLine().ToUpper();
+
+                if (cinsiyetBilgisi != "K" && cinsiyetBilgisi != "E")
+                {
+                    Console.WriteLine("Hatalı giriş yaptınız. Lütfen sadece K veya E girin.");
+                    continue;
+                }
+                CINSIYET cinsiyet = (cinsiyetBilgisi == "K") ? CINSIYET.Kiz : CINSIYET.Erkek;
+                return cinsiyet;
+            }
+        }
+
+        public static DateTime DogumTarihiKontrol(string tarihIstek)
+        {
+            DateTime dogumTarihBilgisi;
+            while (true)
+            {
+                Console.Write(tarihIstek);
+                string girilenTarih = Console.ReadLine();
+                bool basariliMi = DateTime.TryParse(girilenTarih, out dogumTarihBilgisi);
+
+                if (!basariliMi)
+                {
+                    Console.WriteLine("Geçersiz tarih formatı. Lütfen tekrar deneyin.");
+                    continue;
+                }
+                
+                return dogumTarihBilgisi;
+            }
+        }
+
+        public static string OgrenciAdSoyadKontrol(string istek)
+        {
+            string name;
+
+            while (true)
+            {
+                Console.Write(istek);
+                name = Console.ReadLine();
+
+                if (int.TryParse(name, out int sayi) || string.IsNullOrWhiteSpace(name))
+                {
+                    Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
+                    continue;
+                }
+
+                break;
+            }
+            return name;
+        }
+
+        public static void OgrenciBilgiYazdir(Ogrenci ogrenci)
+        {
+            
+            Console.WriteLine("\nÖğrencinin Adı Soyadı: " + ogrenci.Ad + " " + ogrenci.Soyad);
+            Console.WriteLine("Öğrencinin Şubesi: " + ogrenci.Sube.ToString());
+        }
+
 
     }
 }
