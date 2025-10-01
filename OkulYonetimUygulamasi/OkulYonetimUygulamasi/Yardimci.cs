@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,10 +20,6 @@ namespace OkulYonetimUygulamasi
             return okul.Ogrenciler.FirstOrDefault(o => o.No == no);
         }
         
-        public static List<Ogrenci> OgrenciBulSube(Okul okul, SUBE sube)
-        {
-            return okul.Ogrenciler.Where(o => o.Sube == sube).ToList();
-        }
         public static void ListeCikis()
         {
             Console.WriteLine("\nMenüyü tekrar listelemek için \"liste\", çıkış yapmak için \"çıkış\" yazın.");
@@ -146,20 +143,26 @@ namespace OkulYonetimUygulamasi
             return okul.Ogrenciler != null && okul.Ogrenciler.Any();
         }
 
-        public static SUBE SubeKontrol(string subeIstek)
+        public static SUBE? SubeKontrol(string subeIstek)
         {
-            while (true)
-            {
+            //Sube kontrolde sube boş bırakıldığında hata vermesin istiyorum çünkü
+            //yeni kayıt olmuş ve şubesi atanmayan öğrenci olabilir. Empty şubede de öğrenci listesi varsa listelensin.
                 Console.Write(subeIstek);
                 string subebilgisi = Console.ReadLine().ToUpper();
                 Enum.TryParse<SUBE>(subebilgisi, out SUBE sube);
-                if (!Enum.TryParse<SUBE>(subebilgisi, out sube) || int.TryParse(subebilgisi, out int sayi))
+
+            // Sadece Enter'a basıldıysa (tamamen boşsa): Şubesiz öğrenciler
+            if (subebilgisi == "")
+                return null;
+
+            // Sadece boşluk veya saçma karakterler girildiyse: hatalı giriş
+                if (!Enum.TryParse<SUBE>(subebilgisi, out sube) || int.TryParse(subebilgisi, out _) || string.IsNullOrWhiteSpace(subebilgisi))
                 {
                     Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
-                    continue;
+                return SubeKontrol(subeIstek);
                 }
                 return sube;
-            }
+            
         }
 
         public static int OgrenciNoKontrol()
@@ -179,60 +182,64 @@ namespace OkulYonetimUygulamasi
             
         }
 
-        public static CINSIYET CinsiyetKontrol(string cinsiyetIstek)
+        public static CINSIYET? CinsiyetKontrol(string cinsiyetIstek)
         {
             while (true)
             {
-
+          
                 Console.Write(cinsiyetIstek);
                 string cinsiyetBilgisi = Console.ReadLine().ToUpper();
+                if (cinsiyetBilgisi == "")
+                    return null;
 
-                if (cinsiyetBilgisi != "K" && cinsiyetBilgisi != "E")
-                {
-                    Console.WriteLine("Hatalı giriş yaptınız. Lütfen sadece K veya E girin.");
-                    continue;
-                }
-                CINSIYET cinsiyet = (cinsiyetBilgisi == "K") ? CINSIYET.Kiz : CINSIYET.Erkek;
-                return cinsiyet;
-            }
-        }
-
-        public static DateTime DogumTarihiKontrol(string tarihIstek)
-        {
-            DateTime dogumTarihBilgisi;
-            while (true)
-            {
-                Console.Write(tarihIstek);
-                string girilenTarih = Console.ReadLine();
-                bool basariliMi = DateTime.TryParse(girilenTarih, out dogumTarihBilgisi);
-
-                if (!basariliMi)
-                {
-                    Console.WriteLine("Geçersiz tarih formatı. Lütfen tekrar deneyin.");
-                    continue;
-                }
-                
-                return dogumTarihBilgisi;
-            }
-        }
-
-        public static string OgrenciAdSoyadKontrol(string istek)
-        {
-            string name;
-
-            while (true)
-            {
-                Console.Write(istek);
-                name = Console.ReadLine();
-
-                if (int.TryParse(name, out int sayi) || string.IsNullOrWhiteSpace(name))
+                cinsiyetBilgisi = cinsiyetBilgisi.Trim().ToUpper();
+                if (cinsiyetBilgisi == "K")
+                    return CINSIYET.Kiz;
+                else if (cinsiyetBilgisi == "E")
+                    return CINSIYET.Erkek;
+                else
                 {
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
-                    continue;
+                    return CinsiyetKontrol(cinsiyetIstek); // Kullanıcıya tekrar sor
                 }
-
-                break;
+           
             }
+        }
+
+        public static DateTime? DogumTarihiKontrol(string tarihIstek)
+        {
+            DateTime dogumTarihBilgisi;
+          
+                Console.Write(tarihIstek);
+                string girilenTarih = Console.ReadLine();
+
+            if (girilenTarih=="")
+                return null;
+
+            if (DateTime.TryParse(girilenTarih, out dogumTarihBilgisi))
+                return dogumTarihBilgisi;
+
+            Console.WriteLine("Geçersiz tarih formatı. Lütfen tekrar deneyin.");
+            return DogumTarihiKontrol(tarihIstek);
+
+        }
+
+        public static string? OgrenciAdSoyadKontrol(string istek)
+        {
+            
+                Console.Write(istek);
+                string name= Console.ReadLine();
+            if (name == "")
+                return null;
+            
+
+            if (int.TryParse(name, out _) || string.IsNullOrWhiteSpace(name))
+                {
+                    Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
+                 return OgrenciAdSoyadKontrol(istek);
+            }
+
+              
             return name;
         }
 

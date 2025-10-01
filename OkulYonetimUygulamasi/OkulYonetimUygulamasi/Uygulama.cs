@@ -158,8 +158,21 @@ namespace OkulYonetimUygulamasi
         public void SubeyeGoreOgrenciListele()
         {
             Yardimci.BaslikYazdir(2, "Şubeye Göre Öğrenci Listele");
-            SUBE sube=Yardimci.SubeKontrol("Listelemek istediğiniz şubeyi girin (A/B/C): ");
-            var liste = Yardimci.OgrenciBulSube(okul, sube);
+            Console.WriteLine("Şubesi atanmamış öğrenciler için \"Enter\"a basabilirsiniz.");
+            SUBE? sube=Yardimci.SubeKontrol("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            
+            List<Ogrenci> liste;
+            if (sube == null)
+            {
+                // Şubesi atanmamış öğrencileri filtrele
+                liste = okul.Ogrenciler.Where(o => !Enum.IsDefined(typeof(SUBE), o.Sube)).ToList();
+            }
+            else
+            {
+                // Girilen şubedeki öğrencileri filtrele
+                liste = okul.Ogrenciler.Where(o => o.Sube == sube).ToList();
+            }
+
             Console.WriteLine();
             if (liste == null || liste.Count == 0)
             {
@@ -175,13 +188,22 @@ namespace OkulYonetimUygulamasi
         public void CinsiyeteGoreOgrenciListele()
         {
             Yardimci.BaslikYazdir(3, "Cinsiyete Göre Öğrenciler");
-            CINSIYET cinsiyet=Yardimci.CinsiyetKontrol("Listelemek istediğiniz cinsiyeti girin (K/E): ");
-           
-            var liste = okul.Ogrenciler.Where(o => o.Cinsiyet == cinsiyet).ToList();
-
+            Console.WriteLine("Cinsiyet bilgisi girilmemiş öğrenciler için \"Enter\"a basabilirsiniz.");
+            CINSIYET? cinsiyet=Yardimci.CinsiyetKontrol("Listelemek istediğiniz cinsiyeti girin (K/E): ");
+            List<Ogrenci> liste;
+            if (cinsiyet == null)
+            {
+                // Cinsiyeti belirtilmemiş öğrencileri listele
+                liste = okul.Ogrenciler.Where(o => o.Cinsiyet == null || o.Cinsiyet == CINSIYET.Empty).ToList();
+            }
+            else
+            {
+                liste = okul.Ogrenciler.Where(o => o.Cinsiyet == cinsiyet).ToList();
+            }
             if (liste.Count == 0)
             {
-                Console.WriteLine($"\nSistemde hiç {(cinsiyet == CINSIYET.Kiz ? "Kız" : "Erkek")} öğrenci bulunmamaktadır.");
+                                          
+                Console.WriteLine("\nListelenecek ögrenci yok.");
                 return;
             }
             Console.WriteLine();
@@ -190,14 +212,22 @@ namespace OkulYonetimUygulamasi
         public void DogumTarihineGoreOgrenciListele()
         {
             Yardimci.BaslikYazdir(4, "Dogum Tarihine Göre Ögrencileri Listele");
-            DateTime dogumTarihBilgisi=Yardimci.DogumTarihiKontrol("Hangi tarihten sonraki ögrencileri listelemek istersiniz (örn. 01.01.2000): ");
-            
-            // Listeleme:
+            DateTime? dogumTarihBilgisi;
+            while (true)
+            {
+                dogumTarihBilgisi = Yardimci.DogumTarihiKontrol("Hangi tarihten sonraki ögrencileri listelemek istersiniz (örn. 01.01.2000): ");
+               
+                if (dogumTarihBilgisi == null)
+                {
+                    Console.WriteLine("Veri girişi yapılmadı. Tekrar deneyin");
+                    continue;
+                }
+                break;
+            }
             var liste = okul.Ogrenciler.Where(o => o.DogumTarihi > dogumTarihBilgisi).ToList();
-
             if (liste.Count == 0)
             {
-                Console.WriteLine($"\n{dogumTarihBilgisi:dd.MM.yyyy} tarihinden sonra doğmuş öğrenci bulunmamaktadır.");
+                Console.WriteLine("Listelenecek ögrenci yok.");
                 return;
             }
 
@@ -231,14 +261,25 @@ namespace OkulYonetimUygulamasi
         public void SubedeEnYuksekNotlu5Listele()
         {
             Yardimci.BaslikYazdir(10, "Şubedeki en başarılı 5 ögrenciyi listele");
-            SUBE sube = Yardimci.SubeKontrol("Listelemek istediğiniz şubeyi girin (A/B/C): ");
-            
-                var liste = Yardimci.OgrenciBulSube(okul, sube);
-                var subeliste=liste.OrderByDescending(a=>a.Ortalama).Take(5).ToList();
+            Console.WriteLine("Şubesi atanmamış öğrenciler için \"Enter\"a basabilirsiniz.");
+            SUBE? sube = Yardimci.SubeKontrol("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            List<Ogrenci> liste;
+
+            if (sube == null)
+            {
+                // Şubesi atanmamış öğrenciler
+                liste = okul.Ogrenciler.Where(o => !Enum.IsDefined(typeof(SUBE), o.Sube)).ToList();
+            }
+            else
+            {
+                // Belirli şubedeki öğrenciler
+                liste = okul.Ogrenciler.Where(o => o.Sube == sube).ToList();
+            }
+            var subeliste=liste.OrderByDescending(a=>a.Ortalama).Take(5).ToList();
 
                 if (subeliste.Count == 0)
                 {
-                    Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                    Console.WriteLine("\nListelenecek ögrenci yok.");
                     return;
                 }
                
@@ -249,14 +290,25 @@ namespace OkulYonetimUygulamasi
         public void SubedeEnDusukNotlu3Listele()
         {
             Yardimci.BaslikYazdir(11, "Şubedeki en başarısız 3 öğrenciyi listele");
-            SUBE sube = Yardimci.SubeKontrol("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            Console.WriteLine("Şubesi atanmamış öğrenciler için \"Enter\"a basabilirsiniz.");
+            SUBE? sube = Yardimci.SubeKontrol("Listelemek istediğiniz şubeyi girin (A/B/C): ");
+            List<Ogrenci> liste;
 
-            var liste = Yardimci.OgrenciBulSube(okul, sube);
+            if (sube == null)
+            {
+                // Şubesi atanmamış öğrenciler
+                liste = okul.Ogrenciler.Where(o => !Enum.IsDefined(typeof(SUBE), o.Sube)).ToList();
+            }
+            else
+            {
+                // Belirli şubedeki öğrenciler
+                liste = okul.Ogrenciler.Where(o => o.Sube == sube).ToList();
+            }
             var subeliste = liste.OrderBy(a => a.Ortalama).Take(3).ToList();
 
             if (subeliste.Count == 0)
             {
-                Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                Console.WriteLine("\nListelenecek ögrenci yok.");
                 return;
             }
 
@@ -290,20 +342,36 @@ namespace OkulYonetimUygulamasi
         public void SubeninNotOrtalamasiGor()
         {
                Yardimci.BaslikYazdir(13, "Şubenin Not Ortalamasını Gör");
-            
-               SUBE sube= Yardimci.SubeKontrol("Bir şube seçin (A/B/C): ");
-                
-               var liste = Yardimci.OgrenciBulSube(okul, sube);
+            Console.WriteLine("Şubesi atanmamış öğrenciler için \"Enter\"a basabilirsiniz.");
+            SUBE? sube= Yardimci.SubeKontrol("Bir şube seçin (A/B/C): ");
+            List<Ogrenci> liste;
+            if (sube == null)
+            {
+                // Şubesi atanmamış öğrenciler
+                liste = okul.Ogrenciler.Where(o => !Enum.IsDefined(typeof(SUBE), o.Sube)).ToList();
+            }
+            else
+            {
+                // Belirli şubedeki öğrenciler
+                liste = okul.Ogrenciler.Where(o => o.Sube == sube).ToList();
+            }
+
                 if (liste == null || liste.Count == 0)
                 {
-                    Console.WriteLine("Bu şubede öğrenci bulunamadı.");
-                   
+                    Console.WriteLine("\nBu şubede öğrenci bulunamadı.");
+                return;
                 }
-                double ortalama = liste.Average(a => a.Ortalama);
 
-                        Console.WriteLine();
-                        Console.WriteLine(sube + " şubesinin not ortalaması: " + ortalama);
-                        Yardimci.ListeCikis();
+            var notGirilenOgrenciler = liste.Where(o => o.Ortalama > 0).ToList();
+            if (notGirilenOgrenciler.Count == 0)
+            {
+                Console.WriteLine(sube + " şubesinde hiçbir öğrenciye not girilmemiştir.");
+                return;
+            }
+            double ortalama = notGirilenOgrenciler.Average(o => o.Ortalama);
+            Console.WriteLine();
+            Console.WriteLine(sube + " şubesinin not ortalaması: " + ortalama);
+            Yardimci.ListeCikis();
         }
         public void OgrencininOkuduguSonKitapGor()
         {
@@ -341,38 +409,63 @@ namespace OkulYonetimUygulamasi
         {
             Yardimci.BaslikYazdir(15, "Öğrenci Ekle");
             Ogrenci ogrenci = null;
-            int sayi;
             int numara;
             string ad;
             string soyad;
-            DateTime dogumTarihi;
-            CINSIYET cinsiyet;
-            SUBE sube;
-
-            while (true)
-            {
+            DateTime? dogumTarihi;
+            CINSIYET? cinsiyet;
+            SUBE? sube;
+   
                  numara = Yardimci.OgrenciNoKontrol();
                  ogrenci = Yardimci.OgrenciBulNo(okul, numara);
-
-                if (ogrenci != null)
+   
+            while (true)
+            {
+                ad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin adı: ");
+                if (!string.IsNullOrWhiteSpace(ad))
+                    break;
+                Console.WriteLine("Veri girişi yapılmadı. Tekrar deneyin.");
+            }
+            while (true)
+            {
+                soyad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin soyadı: ");
+                if (!string.IsNullOrWhiteSpace(soyad))
+                    break;
+                Console.WriteLine("Veri girişi yapılmadı. Tekrar deneyin.");
+            }
+            while (true)
+            {
+                dogumTarihi = Yardimci.DogumTarihiKontrol("Öğrencinin doğum tarihi: ");
+                if (dogumTarihi == null)
                 {
-                    Console.WriteLine("Bu numaraya ait kayıtlı bir öğrenci bulunmaktadır. Başka bir numara deneyin.");
+                    Console.WriteLine("Veri girişi yapılmadı. Tekrar deneyin.");
                     continue;
                 }
                 break;
+
             }
+            Console.WriteLine("\nCinsiyeti boş bırakmak için \"Enter\"a basabilirsiniz.");
+            cinsiyet = Yardimci.CinsiyetKontrol("Öğrencinin cinsiyeti (K/E): ");
+            if (cinsiyet == null) cinsiyet = CINSIYET.Empty;
 
-            ad=Yardimci.OgrenciAdSoyadKontrol("Öğrencinin adı: ");
-            soyad=Yardimci.OgrenciAdSoyadKontrol("Öğrencinin soyadı: ");
-         
-            dogumTarihi = Yardimci.DogumTarihiKontrol("Öğrencinin doğum tarihi: ");
+            Console.WriteLine("\nŞubeyi boş bırakmak için \"Enter\"a basabilirsiniz.");
+            sube = Yardimci.SubeKontrol("Öğrencinin şubesi (A/B/C): ");
+            if (sube == null) sube = SUBE.Empty;
 
-            cinsiyet =Yardimci.CinsiyetKontrol("Ögrencinin cinsiyeti (K/E): ");
+
+            if ( ogrenci != null)
+            {
+                 int yeniNumara=okul.Ogrenciler.Count() + 1;
+                    
+                    Console.WriteLine("\n" + yeniNumara + " numaralı ögrenci sisteme basarılı bir sekilde eklenmistir." +
+                        "\nSistemde " + numara + " numaralı öğrenci olduğu için verdiğiniz öğrenci no " + yeniNumara + " olarak değiştirildi.");
+                okul.OgrenciEkle(yeniNumara, ad, soyad, dogumTarihi.Value, cinsiyet.Value, sube.Value);
+                Yardimci.ListeCikis();
+                return;
+            }
             
-            sube=Yardimci.SubeKontrol("Öğrencinin şubesi (A/B/C): ");
-                       
-            Console.WriteLine("Öğrenci eklendi.");
-            okul.OgrenciEkle(numara, ad, soyad, dogumTarihi, cinsiyet, sube);
+            Console.WriteLine("\n" + numara + " numaralı ögrenci sisteme basarılı bir sekilde eklenmistir.");
+            okul.OgrenciEkle(numara, ad, soyad, dogumTarihi.Value, cinsiyet.Value, sube.Value);
             Yardimci.ListeCikis();
         }
         public void OgrenciGuncelle()
@@ -382,9 +475,11 @@ namespace OkulYonetimUygulamasi
             int numara;
             string ad;
             string soyad;
-            DateTime dogumTarihi;
-            CINSIYET cinsiyet;
-            SUBE sube;
+            DateTime? dogumTarihi;
+            CINSIYET? cinsiyet;
+            SUBE? sube;
+
+            Console.WriteLine("Değiştirmek istemediğiniz bilgiler için \"Enter\"a basabilirsiniz.\n");
 
             while (true)
             {
@@ -400,12 +495,23 @@ namespace OkulYonetimUygulamasi
             }
            
             ad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin adı: ");
+            if (string.IsNullOrWhiteSpace(ad))
+                ad = ogrenci.Ad;
             soyad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin soyadı: ");
+            if (string.IsNullOrWhiteSpace(soyad))
+                soyad = ogrenci.Soyad;
             dogumTarihi = Yardimci.DogumTarihiKontrol("Öğrencinin doğum tarihi: ");
-            cinsiyet = Yardimci.CinsiyetKontrol("Ögrencinin cinsiyeti (K/E): ");
+            if (dogumTarihi == null)
+                dogumTarihi = ogrenci.DogumTarihi;
+
+            cinsiyet = Yardimci.CinsiyetKontrol("Öğrencinin cinsiyeti (K/E): ");
+            if (cinsiyet == null) cinsiyet = ogrenci.Cinsiyet;
+
             sube = Yardimci.SubeKontrol("Öğrencinin şubesi (A/B/C): ");
-            
-            okul.OgrenciGuncelle(numara, ad, soyad, dogumTarihi, cinsiyet, sube);
+            if (sube == null)
+                sube = ogrenci.Sube;
+
+            okul.OgrenciGuncelle(numara, ad, soyad, dogumTarihi.Value, cinsiyet.Value, sube.Value);
             Console.WriteLine("\nÖğrenci güncellendi.");
             Yardimci.ListeCikis();
         }
