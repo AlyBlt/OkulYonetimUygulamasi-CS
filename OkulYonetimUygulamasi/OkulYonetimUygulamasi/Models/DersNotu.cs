@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OkulYonetimUygulamasi
+namespace OkulYonetimUygulamasi.Models
 {
-    internal class DersNotu
+    public class DersNotu
     {
         public DersNotu(string dersAdi, int not)
         {
-            this.DersAdi = dersAdi;
-            this.Not = not;
+            DersAdi = dersAdi;
+            Not = not;
         }
 
         public string DersAdi { get; set; }

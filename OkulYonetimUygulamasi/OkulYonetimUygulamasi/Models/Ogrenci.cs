@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OkulYonetimUygulamasi
+namespace OkulYonetimUygulamasi.Models
 {
-    internal class Ogrenci
+    public class Ogrenci
     {
         public int No { get; set; }
         public string Ad { get; set; }
@@ -35,7 +35,7 @@ namespace OkulYonetimUygulamasi
         {
             get
             {
-                return this.Kitaplar.Count;
+                return Kitaplar.Count;
             }
 
         }
@@ -54,7 +54,7 @@ namespace OkulYonetimUygulamasi
         public void AdresEkle(string il, string ilce, string mahalle)
         {
             
-            this.Adresi = new Adres
+            Adresi = new Adres
             {
                 Il = il.Trim(),
                 Ilce = ilce.Trim(),
