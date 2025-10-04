@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace OkulYonetimUygulamasi
 {
     internal class Yardimci
     {
-       
         public static void BaslikYazdir(int baslikno, string baslik)
         {
             Console.WriteLine("\n" + baslikno + "-" + baslik + "-----------------------------------------------------------------------\n");
@@ -19,7 +19,16 @@ namespace OkulYonetimUygulamasi
         {
             return okul.Ogrenciler.FirstOrDefault(o => o.No == no);
         }
-        
+        public static int BosOgrenciNumarasiGetir(List<Ogrenci> ogrenciler)
+        {
+            var mevcutNumaralar = ogrenciler.Select(o => o.No).OrderBy(n => n).ToList();
+            for (int i = 1; i <= mevcutNumaralar.Count; i++)
+            {
+                if (mevcutNumaralar[i - 1] != i)
+                    return i;
+            }
+            return mevcutNumaralar.Count + 1;
+        }
         public static void ListeCikis()
         {
             Console.WriteLine("\nMenüyü tekrar listelemek için \"liste\", çıkış yapmak için \"çıkış\" yazın.");
@@ -41,7 +50,6 @@ namespace OkulYonetimUygulamasi
 
             ListeCikis();
         }
-
         public static void OgrenciListele1(int no)
         {
             BaslikYazdir(5, "Illere Göre Ögrencileri Listele ");
@@ -57,120 +65,117 @@ namespace OkulYonetimUygulamasi
 
             ListeCikis();
         }
-
         public static void OgrenciListele2(int no)
         {
             BaslikYazdir(6, "Ögrencinin notlarını görüntüle");
-            Console.Write("Öğrencinin numarası: ");
-            string numara = Console.ReadLine();
-
-            if (int.TryParse(numara, out int sayi))
+            while (true)
             {
-                var ogrenci = OgrenciBulNo(Uygulama.okul, sayi);
-                if (ogrenci == null)
-                {
-                    Console.WriteLine("\nBu numarada bir öğrenci bulunmamaktadır.");
-                    return;
-                }
+                int sayi=OgrenciNoKontrol();
+               
+                    var ogrenci = OgrenciBulNo(Uygulama.okul, sayi);
+                    if (ogrenci == null)
+                    {
+                        Console.WriteLine("Bu numarada bir ögrenci yok.Tekrar deneyin.");
+                        continue;
+                    }
 
-                Console.WriteLine("\nÖğrencinin Adı Soyadı: " + ogrenci.Ad + " " + ogrenci.Soyad);
-                Console.WriteLine("Öğrencinin Şubesi: " + ogrenci.Sube.ToString());
+                      OgrenciBilgiYazdir(ogrenci);
 
-                if (ogrenci.Notlar.Count == 0)
-                {
-                    Console.WriteLine(ogrenci.Ad + " " + ogrenci.Soyad + " öğrencisinin henüz girilmiş bir notu yoktur.");
-                    return;
-                }
+                    if (ogrenci.Notlar.Count == 0)
+                    {
+                        Console.WriteLine("\n" + ogrenci.Ad + " " + ogrenci.Soyad + " öğrencisine ait bir not bulunmamaktadır");
+                        ListeCikis();
+                        return;
+                    }
 
 
-                Console.WriteLine("\nDersin Adı".PadRight(15) + "Notu");
-                Console.WriteLine("-------------------");
+                    Console.WriteLine("\nDersin Adı".PadRight(15) + "Notu");
+                    Console.WriteLine("-------------------");
 
-                var liste = Uygulama.okul.Ogrenciler.Where(o => o.No == no).ToList();
-                foreach (var dersNotu in ogrenci.Notlar)
-                {
-                    Console.WriteLine(dersNotu.DersAdi.PadRight(15) + dersNotu.Not);
-                }
+                    foreach (var dersNotu in ogrenci.Notlar)
+                    {
+                        Console.WriteLine(dersNotu.DersAdi.PadRight(15) + dersNotu.Not);
+                    }
+                
+                break;
             }
-            else { Console.WriteLine("Hatali giris yapildi. Tekrar deneyin."); }
             
             ListeCikis();
         }
-
         public static void OgrenciListele3(int no)
         {
             BaslikYazdir(7, "Ögrencinin okudugu kitapları listele");
-            Console.Write("Öğrencinin numarası: ");
-            string numara = Console.ReadLine();
-
-            if (int.TryParse(numara, out int sayi))
+            while (true)
             {
-                var ogrenci = OgrenciBulNo(Uygulama.okul, sayi);
-                if (ogrenci == null)
-                {
-                    Console.WriteLine("\nBu numarada bir öğrenci bulunmamaktadır.");
-                    return;
+                int sayi = OgrenciNoKontrol();
+
+                    var ogrenci = OgrenciBulNo(Uygulama.okul, sayi);
+                    if (ogrenci == null)
+                    {
+                        Console.WriteLine("Bu numarada bir ögrenci yok.Tekrar deneyin.");
+                        continue;
+                    }
+
+                    OgrenciBilgiYazdir(ogrenci);
+
+                    if (ogrenci.Kitaplar.Count == 0)
+                    {
+                        Console.WriteLine("\nÖğrencinin okuduğu herhangi bir kitap bulunmamaktadır.");
+                        ListeCikis();
+                        return;
+                    }
+
+                    Console.WriteLine("\nOkuduğu Kitaplar");
+                    Console.WriteLine("-------------------");
+
+                    foreach (var kitap in ogrenci.Kitaplar)
+                    {
+                        Console.WriteLine(kitap);
+                    }
+                break;
+                    
                 }
-
-                Console.WriteLine("\nÖğrencinin Adı Soyadı: " + ogrenci.Ad + " " + ogrenci.Soyad);
-                Console.WriteLine("Öğrencinin Şubesi: " + ogrenci.Sube.ToString());
-
-                if (ogrenci.Kitaplar.Count == 0)
-                {
-                    Console.WriteLine(ogrenci.Ad + " " + ogrenci.Soyad + " öğrencisinin okuduğu kayıtlı bir kitap yoktur.");
-                    return;
-                }
-
-                Console.WriteLine("\nOkuduğu Kitaplar");
-                Console.WriteLine("-------------------");
-
-                var liste = Uygulama.okul.Ogrenciler.Where(o => o.No == no).ToList();
-
-                foreach (var kitap in ogrenci.Kitaplar)
-                {
-                    Console.WriteLine(kitap);
-                }
-            }
-
-            else { Console.WriteLine("Hatali giris yapildi. Tekrar deneyin."); }
-
                 ListeCikis();
-
         }
-
         public static bool OgrenciVarMi(Okul okul)
         {
             return okul.Ogrenciler != null && okul.Ogrenciler.Any();
         }
-
         public static SUBE? SubeKontrol(string subeIstek)
         {
             //Sube kontrolde sube boş bırakıldığında hata vermesin istiyorum çünkü
             //yeni kayıt olmuş ve şubesi atanmayan öğrenci olabilir. Empty şubede de öğrenci listesi varsa listelensin.
+            while (true)
+            {
                 Console.Write(subeIstek);
-                string subebilgisi = Console.ReadLine().ToUpper();
-                Enum.TryParse<SUBE>(subebilgisi, out SUBE sube);
+                string subebilgisi = Console.ReadLine()?.ToUpper();
 
-            // Sadece Enter'a basıldıysa (tamamen boşsa): Şubesiz öğrenciler
-            if (subebilgisi == "")
-                return null;
+                // Sadece Enter'a basıldıysa (tamamen boşsa): Şubesiz öğrenciler
+                if (string.IsNullOrEmpty(subebilgisi))
+                    return null;
 
-            // Sadece boşluk veya saçma karakterler girildiyse: hatalı giriş
-                if (!Enum.TryParse<SUBE>(subebilgisi, out sube) || int.TryParse(subebilgisi, out _) || string.IsNullOrWhiteSpace(subebilgisi))
+                if (int.TryParse(subebilgisi, out _) || string.IsNullOrWhiteSpace(subebilgisi))
                 {
-                    Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
-                return SubeKontrol(subeIstek);
+                    Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
+                    continue;
                 }
-                return sube;
+
+                // Sadece boşluk veya saçma karakterler girildiyse: hatalı giriş
+                if (Enum.TryParse(subebilgisi, out SUBE sube) && Enum.IsDefined(typeof(SUBE), sube))
+                {
+                    return sube;
+                }
+                    Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
+                continue;
+            }
             
         }
-
         public static int OgrenciNoKontrol()
         {
             while (true)
             {
                 Console.Write("Öğrencinin numarası: ");
-                string numara = Console.ReadLine();
+                string? numara = Console.ReadLine();
                 if (!int.TryParse(numara, out int sayi))
                 {
                     Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
@@ -179,17 +184,14 @@ namespace OkulYonetimUygulamasi
                 
                 return sayi;
             }
-            
         }
-
         public static CINSIYET? CinsiyetKontrol(string cinsiyetIstek)
         {
             while (true)
             {
-          
                 Console.Write(cinsiyetIstek);
                 string cinsiyetBilgisi = Console.ReadLine().ToUpper();
-                if (cinsiyetBilgisi == "")
+                if (string.IsNullOrEmpty(cinsiyetBilgisi))
                     return null;
 
                 cinsiyetBilgisi = cinsiyetBilgisi.Trim().ToUpper();
@@ -202,7 +204,6 @@ namespace OkulYonetimUygulamasi
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
                     return CinsiyetKontrol(cinsiyetIstek); // Kullanıcıya tekrar sor
                 }
-           
             }
         }
 
@@ -213,34 +214,33 @@ namespace OkulYonetimUygulamasi
                 Console.Write(tarihIstek);
                 string girilenTarih = Console.ReadLine();
 
-            if (girilenTarih=="")
+            if (string.IsNullOrEmpty(girilenTarih))
                 return null;
 
             if (DateTime.TryParse(girilenTarih, out dogumTarihBilgisi))
                 return dogumTarihBilgisi;
 
-            Console.WriteLine("Geçersiz tarih formatı. Lütfen tekrar deneyin.");
+            Console.WriteLine("Hatali giris yapildi. Tekrar deneyin.");
             return DogumTarihiKontrol(tarihIstek);
 
         }
-
         public static string? OgrenciAdSoyadKontrol(string istek)
         {
-            
                 Console.Write(istek);
-                string name= Console.ReadLine();
-            if (name == "")
-                return null;
-            
+                string? input = Console.ReadLine();
 
-            if (int.TryParse(name, out _) || string.IsNullOrWhiteSpace(name))
-                {
-                    Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
-                 return OgrenciAdSoyadKontrol(istek);
+                if (string.IsNullOrEmpty(input))
+                    return null; 
+
+            // Sadece harfler (Türkçe dahil) ve boşluklara izin veren regex
+            if (Regex.IsMatch(input, @"^(?=.*[a-zA-ZçÇğĞıİöÖşŞüÜ])[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$"))
+                return IlkHarfBuyut(input);
+            else
+            {
+                Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
+                OgrenciAdSoyadKontrol(istek);
             }
-
-              
-            return name;
+            return input;
         }
 
         public static void OgrenciBilgiYazdir(Ogrenci ogrenci)
@@ -250,6 +250,22 @@ namespace OkulYonetimUygulamasi
             Console.WriteLine("Öğrencinin Şubesi: " + ogrenci.Sube.ToString());
         }
 
+        public static string IlkHarfBuyut(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return input;
+
+            var kelimeler = input.Trim().ToLower().Split(' ');
+            for (int i = 0; i < kelimeler.Length; i++)
+            {
+                if (kelimeler[i].Length > 0)
+                {
+                    kelimeler[i] = char.ToUpper(kelimeler[i][0]) + kelimeler[i].Substring(1);
+                }
+            }
+
+            return string.Join(" ", kelimeler);
+        }
 
     }
 }

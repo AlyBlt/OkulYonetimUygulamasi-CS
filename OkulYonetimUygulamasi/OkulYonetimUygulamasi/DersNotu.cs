@@ -14,7 +14,7 @@ namespace OkulYonetimUygulamasi
             this.Not = not;
         }
 
-        public string DersAdi;
-        public int Not;
+        public string DersAdi { get; set; }
+        public int Not { get; set; }
     }
 }

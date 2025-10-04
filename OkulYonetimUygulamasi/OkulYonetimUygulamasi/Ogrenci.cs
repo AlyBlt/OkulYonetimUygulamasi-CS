@@ -25,8 +25,8 @@ namespace OkulYonetimUygulamasi
             get
             {
                 if (Notlar == null || Notlar.Count == 0) return 0;
-                float ort = Notlar.Sum(x => x.Not);
-                return ort / this.Notlar.Count;
+                float ort = (float)Notlar.Average(x => x.Not);
+                return ort;
 
             }
         }
@@ -43,10 +43,7 @@ namespace OkulYonetimUygulamasi
 
         public void KitapEkle(string kitapAdi)
         {
-            // Önce boşsa listeyi oluştur (opsiyonel)
-            if (Kitaplar == null)
-                Kitaplar = new List<string>();
-
+            
             // Kitap listesinde büyük-küçük harfe duyarsız kontrol yaparak varsa ekleme
             if (!Kitaplar.Any(k => string.Equals(k, kitapAdi.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
@@ -56,12 +53,7 @@ namespace OkulYonetimUygulamasi
 
         public void AdresEkle(string il, string ilce, string mahalle)
         {
-            if (string.IsNullOrWhiteSpace(il) || string.IsNullOrWhiteSpace(ilce) || string.IsNullOrWhiteSpace(mahalle))
-            {
-                Console.WriteLine("Adres bilgileri eksik. İl ve ilçe boş olamaz.");
-                return;
-            }
-
+            
             this.Adresi = new Adres
             {
                 Il = il.Trim(),

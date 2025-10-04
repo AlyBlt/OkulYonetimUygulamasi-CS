@@ -19,6 +19,7 @@ namespace OkulYonetimUygulamasi
         public void Menu()
         {
             Console.WriteLine("\n------  Okul Yönetim Uygulaması  ------\n");
+            Console.WriteLine($"Tarih: {DateTime.Now.ToShortDateString()}  Saat: {DateTime.Now.ToLongTimeString()}\n");
             Console.WriteLine("1 - Bütün Öğrencileri Listele");
             Console.WriteLine("2 - Şubeye Göre Öğrencileri Listele");
             Console.WriteLine("3 - Cinsiyetine Göre Öğrencileri Listele");
@@ -40,8 +41,7 @@ namespace OkulYonetimUygulamasi
             Console.WriteLine("19 - Öğrencinin Okuduğu Kitabı Gir");
             Console.WriteLine("20 - Öğrencinin Notunu Gir");
             Console.WriteLine("\nÇıkış yapmak için \"çıkış\" yazıp \"enter\"a basın.");
-
-
+            
         }
         public void Yonetim()
         {
@@ -125,7 +125,7 @@ namespace OkulYonetimUygulamasi
                         break;
                     case "LİSTE":
                     case "LISTE":
-                        Console.Clear();
+                        //Console.Clear();
                         Menu();
                         break;
                     default:
@@ -149,10 +149,15 @@ namespace OkulYonetimUygulamasi
             if (!Yardimci.OgrenciVarMi(okul))
             {
                 Console.WriteLine("\nHenüz sisteme kayıtlı öğrenci yok.");
+                Yardimci.ListeCikis();
                 return;
             }
 
-            Yardimci.OgrenciListele(okul.Ogrenciler, 1, "Bütün Öğrencileri Listele");
+            //asağıdaki listeyi silinen ve yerine eklenen öğrenci olursa numaraları sırasıyla göstersin diye ekledim.
+            //mesela 5 silindi, daha sonra eklenen öğrenci 5 numaraya atandı ama 5 en sonda görünmesin listede.
+            var siraliOgrenciler = okul.Ogrenciler.OrderBy(o => o.No).ToList();
+
+            Yardimci.OgrenciListele(siraliOgrenciler, 1, "Bütün Öğrencileri Listele");
         }
 
         public void SubeyeGoreOgrenciListele()
@@ -173,10 +178,10 @@ namespace OkulYonetimUygulamasi
                 liste = okul.Ogrenciler.Where(o => o.Sube == sube).ToList();
             }
 
-            Console.WriteLine();
             if (liste == null || liste.Count == 0)
             {
-                Console.WriteLine("Bu şubede öğrenci bulunamadı.");
+                Console.WriteLine("\nListelenecek ögrenci yok.");
+                Yardimci.ListeCikis();
                 return;
             }
 
@@ -200,10 +205,11 @@ namespace OkulYonetimUygulamasi
             {
                 liste = okul.Ogrenciler.Where(o => o.Cinsiyet == cinsiyet).ToList();
             }
-            if (liste.Count == 0)
+            if (liste.Count == 0 || liste==null)
             {
                                           
                 Console.WriteLine("\nListelenecek ögrenci yok.");
+                Yardimci.ListeCikis();
                 return;
             }
             Console.WriteLine();
@@ -228,7 +234,9 @@ namespace OkulYonetimUygulamasi
             if (liste.Count == 0)
             {
                 Console.WriteLine("Listelenecek ögrenci yok.");
+                Yardimci.ListeCikis();
                 return;
+
             }
 
             Console.WriteLine();
@@ -279,8 +287,9 @@ namespace OkulYonetimUygulamasi
 
                 if (subeliste.Count == 0)
                 {
-                    Console.WriteLine("\nListelenecek ögrenci yok.");
-                    return;
+                Console.WriteLine("\nListelenecek ögrenci yok.");
+                Yardimci.ListeCikis();
+                return;
                 }
                
                     Console.WriteLine();
@@ -309,6 +318,7 @@ namespace OkulYonetimUygulamasi
             if (subeliste.Count == 0)
             {
                 Console.WriteLine("\nListelenecek ögrenci yok.");
+                Yardimci.ListeCikis();
                 return;
             }
 
@@ -326,7 +336,7 @@ namespace OkulYonetimUygulamasi
             
                 if (ogrenci == null)
                 {
-                    Console.WriteLine("Bu numarada bir öğrenci bulunmamaktadır.");
+                    Console.WriteLine("Bu numarada bir ögrenci yok.Tekrar deneyin.");
                     continue;
                 }
                 break;
@@ -345,10 +355,11 @@ namespace OkulYonetimUygulamasi
             Console.WriteLine("Şubesi atanmamış öğrenciler için \"Enter\"a basabilirsiniz.");
             SUBE? sube= Yardimci.SubeKontrol("Bir şube seçin (A/B/C): ");
             List<Ogrenci> liste;
-            if (sube == null)
+            if (sube ==null)
             {
                 // Şubesi atanmamış öğrenciler
-                liste = okul.Ogrenciler.Where(o => !Enum.IsDefined(typeof(SUBE), o.Sube)).ToList();
+                liste = okul.Ogrenciler.Where(o => o.Sube==SUBE.Empty).ToList();
+                sube=SUBE.Empty;
             }
             else
             {
@@ -359,16 +370,11 @@ namespace OkulYonetimUygulamasi
                 if (liste == null || liste.Count == 0)
                 {
                     Console.WriteLine("\nBu şubede öğrenci bulunamadı.");
+                Yardimci.ListeCikis();
                 return;
                 }
 
-            var notGirilenOgrenciler = liste.Where(o => o.Ortalama > 0).ToList();
-            if (notGirilenOgrenciler.Count == 0)
-            {
-                Console.WriteLine(sube + " şubesinde hiçbir öğrenciye not girilmemiştir.");
-                return;
-            }
-            double ortalama = notGirilenOgrenciler.Average(o => o.Ortalama);
+            double ortalama = liste.Average(o => o.Ortalama);
             Console.WriteLine();
             Console.WriteLine(sube + " şubesinin not ortalaması: " + ortalama);
             Yardimci.ListeCikis();
@@ -385,7 +391,7 @@ namespace OkulYonetimUygulamasi
 
                 if (ogrenci == null)
                 {
-                    Console.WriteLine("Bu numaraya ait bir öğrenci bulunamadı. Tekrar deneyin.");
+                    Console.WriteLine("Bu numarada bir ögrenci yok. Tekrar deneyin.");
                     continue;
                 }
                 break;
@@ -408,17 +414,23 @@ namespace OkulYonetimUygulamasi
         public void OgrenciEkle()
         {
             Yardimci.BaslikYazdir(15, "Öğrenci Ekle");
-            Ogrenci ogrenci = null;
-            int numara;
-            string ad;
-            string soyad;
+            string? ad;
+            string? soyad;
             DateTime? dogumTarihi;
             CINSIYET? cinsiyet;
             SUBE? sube;
-   
-                 numara = Yardimci.OgrenciNoKontrol();
-                 ogrenci = Yardimci.OgrenciBulNo(okul, numara);
-   
+
+            //int numara = Yardimci.OgrenciNoKontrol();
+            //Ogrenci ogrenci = Yardimci.OgrenciBulNo(okul, numara);
+
+            //Öğrenci numarasını sormasın otomatik atasın istiyorum.Çünkü burada mesela 5 numaralı öğrenci var,
+            //numaraya 5 yazınca hata vermiyor ama en sonda otomatik max numara + 1'e atıyor. Kullanıcının kafası karışabilir.
+            //Ya baştan uyarı versin ya da hiç sormasın/bence sormasa daha işlevsel.
+            //Ayrıca en sona atayınca arada silinenler boş kalıyor. Ben eklenen öğrenciyi boş numara varsa 
+            //en küçük boş numaraya atasın istiyorum.
+
+            int numara = Yardimci.BosOgrenciNumarasiGetir(okul.Ogrenciler);
+
             while (true)
             {
                 ad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin adı: ");
@@ -452,35 +464,25 @@ namespace OkulYonetimUygulamasi
             sube = Yardimci.SubeKontrol("Öğrencinin şubesi (A/B/C): ");
             if (sube == null) sube = SUBE.Empty;
 
-
-            if ( ogrenci != null)
-            {
-                 int yeniNumara=okul.Ogrenciler.Count() + 1;
-                    
-                    Console.WriteLine("\n" + yeniNumara + " numaralı ögrenci sisteme basarılı bir sekilde eklenmistir." +
-                        "\nSistemde " + numara + " numaralı öğrenci olduğu için verdiğiniz öğrenci no " + yeniNumara + " olarak değiştirildi.");
-                okul.OgrenciEkle(yeniNumara, ad, soyad, dogumTarihi.Value, cinsiyet.Value, sube.Value);
-                Yardimci.ListeCikis();
-                return;
-            }
             
-            Console.WriteLine("\n" + numara + " numaralı ögrenci sisteme basarılı bir sekilde eklenmistir.");
+            Console.WriteLine("\nÖğrenci " + numara + " okul numarası ile sisteme basarılı bir sekilde eklenmistir.");
             okul.OgrenciEkle(numara, ad, soyad, dogumTarihi.Value, cinsiyet.Value, sube.Value);
             Yardimci.ListeCikis();
         }
         public void OgrenciGuncelle()
         {
             Yardimci.BaslikYazdir(16, "Öğrenci Güncelle");
-            Ogrenci ogrenci = null;
+            Ogrenci ogrenci;
             int numara;
-            string ad;
-            string soyad;
+            string? ad;
+            string? soyad;
             DateTime? dogumTarihi;
             CINSIYET? cinsiyet;
             SUBE? sube;
 
-            Console.WriteLine("Değiştirmek istemediğiniz bilgiler için \"Enter\"a basabilirsiniz.\n");
-
+            Console.WriteLine("Değiştirmek istemediğiniz bilgiler için \"Enter\"a basabilirsiniz.");
+            Console.WriteLine("Bilgileri güncellenecek öğrencinin numarası zorunludur.");
+           
             while (true)
             {
                 numara = Yardimci.OgrenciNoKontrol();
@@ -488,17 +490,17 @@ namespace OkulYonetimUygulamasi
 
                 if (ogrenci == null)
                 {
-                    Console.WriteLine("Bu numaraya ait bir öğrenci bulunamadı. Tekrar deneyin.");
+                    Console.WriteLine("Bu numarada bir ögrenci yok. Tekrar deneyin.");
                     continue;
                 }
                 break;
             }
            
             ad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin adı: ");
-            if (string.IsNullOrWhiteSpace(ad))
+            if (ad==null)
                 ad = ogrenci.Ad;
             soyad = Yardimci.OgrenciAdSoyadKontrol("Öğrencinin soyadı: ");
-            if (string.IsNullOrWhiteSpace(soyad))
+            if (soyad==null)
                 soyad = ogrenci.Soyad;
             dogumTarihi = Yardimci.DogumTarihiKontrol("Öğrencinin doğum tarihi: ");
             if (dogumTarihi == null)
@@ -520,7 +522,7 @@ namespace OkulYonetimUygulamasi
         {
             Yardimci.BaslikYazdir(17, "Ögrenci sil");
             int numara;
-            Ogrenci ogrenci = null;
+            Ogrenci ogrenci;
             while (true)
             {
                 numara = Yardimci.OgrenciNoKontrol();
@@ -528,23 +530,31 @@ namespace OkulYonetimUygulamasi
 
                 if (ogrenci == null)
                 {
-                    Console.WriteLine("Bu numaraya ait bir öğrenci bulunamadı. Tekrar deneyin.");
+                    Console.WriteLine("Bu numarada bir ögrenci yok. Tekrar deneyin.");
                     continue;
                 }
                 break;
             }
-            Yardimci.OgrenciBilgiYazdir(ogrenci);
-
+            Yardimci.OgrenciBilgiYazdir(ogrenci); 
+            Console.WriteLine("\nOnaylamak için \"E\" iptal etmek için \"H\" yazıp \"Enter\"a basın.");
             while (true)
             {
                 Console.Write("Ögrenciyi silmek istediginize emin misiniz (E/H): ");
-                string cevap = Console.ReadLine().ToUpper();
-                if (int.TryParse(cevap, out int sayi) || string.IsNullOrWhiteSpace(cevap))
+                string? giris = Console.ReadLine();
+                if (giris == null)
+                {
+                    Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin."); continue;
+                }
+                string cevap = giris.ToUpper();
+                if (int.TryParse(cevap, out _))
                 {
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
                     continue;
                 }
-                if (cevap != "E" && cevap != "H")
+                if (cevap == "")
+                { Console.WriteLine("Veri girişi yapılmadı. Tekrar deneyin."); }
+
+                if (cevap != "E" && cevap != "H" && cevap!="")
                 {
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
                     continue;
@@ -557,6 +567,7 @@ namespace OkulYonetimUygulamasi
                 if (cevap == "E")
                 {
                     Console.WriteLine("Ögrenci basarılı bir sekilde silindi.");
+                    Yardimci.ListeCikis();
                     okul.OgrenciSil(numara);
                     return;
                 }
@@ -566,11 +577,12 @@ namespace OkulYonetimUygulamasi
         public void OgrencininAdresiniGir()
         {
             Yardimci.BaslikYazdir(18, "Ögrencinin Adresini Gir");
+            Console.WriteLine("Adres bilgilerini dolduruken boş bırakmak için \"enter\"a basabilirsiniz.");
             int numara;
-            string il;
-            string ilce;
-            string mahalle;
-            Ogrenci ogrenci = null;
+            string il="";
+            string ilce="";
+            string mahalle="";
+            Ogrenci? ogrenci = null;
             while (true)
             {
                 numara = Yardimci.OgrenciNoKontrol();
@@ -584,45 +596,53 @@ namespace OkulYonetimUygulamasi
                 break;
             }
             Yardimci.OgrenciBilgiYazdir(ogrenci);
-
+            Console.WriteLine();
             while (true)
             {
                 Console.Write("İl: ");
-                string cevapIl= Console.ReadLine();
-                if (int.TryParse(cevapIl, out int sayi1) || string.IsNullOrWhiteSpace(cevapIl))
+                string? cevapIl= Console.ReadLine();
+                
+                if (int.TryParse(cevapIl, out _) || cevapIl == " ")
                 {
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
                     continue;
                 }
-                il = cevapIl;
+                if (cevapIl == null)
+                { Console.WriteLine("Veri girişi yapılmadı."); break; }
+
+                il=Yardimci.IlkHarfBuyut(cevapIl);
                 break;
             }
             while (true)
             {
                 Console.Write("İlçe: ");
-                string cevapIlce = Console.ReadLine();
-                if (int.TryParse(cevapIlce, out int sayi2) || string.IsNullOrWhiteSpace(cevapIlce))
+                string? cevapIlce = Console.ReadLine();
+                if (int.TryParse(cevapIlce, out int _) || cevapIlce==" ")
                 {
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
                     continue;
                 }
-                ilce = cevapIlce;
+                if (cevapIlce == null)
+                { Console.WriteLine("Veri girişi yapılmadı."); break; }
+                ilce = Yardimci.IlkHarfBuyut(cevapIlce);
                 break;
             }
             while (true)
             {
                 Console.Write("Mahalle: ");
-                string cevapMahalle = Console.ReadLine();
-                if (int.TryParse(cevapMahalle, out int sayi3) || string.IsNullOrWhiteSpace(cevapMahalle))
+                string? cevapMahalle = Console.ReadLine();
+                if (int.TryParse(cevapMahalle, out int _) || cevapMahalle==" ")
                 {
                     Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
                     continue;
                 }
-                mahalle= cevapMahalle;
+                if (cevapMahalle == null)
+                    { Console.WriteLine("Veri girişi yapılmadı."); break; }
+                mahalle = Yardimci.IlkHarfBuyut(cevapMahalle);
                 break;
             }
 
-            Console.WriteLine("Bilgiler sisteme girilmistir.");
+            Console.WriteLine("\nBilgiler sisteme girilmistir.");
             okul.AdresEkle(numara, il, ilce, mahalle);
         }
 
@@ -631,7 +651,7 @@ namespace OkulYonetimUygulamasi
             Yardimci.BaslikYazdir(19, "Ögrencinin okudugu kitabı gir");
             int numara;
             string kitapAdi;
-            Ogrenci ogrenci = null;
+            Ogrenci ogrenci;
             while (true)
             {
                 numara = Yardimci.OgrenciNoKontrol();
@@ -648,14 +668,14 @@ namespace OkulYonetimUygulamasi
             
             while (true)
             {
-                Console.Write("Eklenecek Kitabin Adı: ");
-                string kitap=Console.ReadLine();
+                Console.Write("\nEklenecek Kitabin Adı: ");
+                string? kitap=Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(kitap))
                 {
                     Console.WriteLine("Kitap adı boş bırakılamaz. Tekrar deneyin.");
                     continue;
                 }
-                kitapAdi = kitap;
+                kitapAdi = Yardimci.IlkHarfBuyut(kitap);
                 Console.WriteLine("Bilgiler sisteme girilmistir.");
                 break;
             }
@@ -667,10 +687,11 @@ namespace OkulYonetimUygulamasi
         {
             Yardimci.BaslikYazdir(20, "Not Gir");
             int numara;
-            Ogrenci ogrenci=null;
+            Ogrenci ogrenci;
+            string? ders;
+            int adet;
             try
             {
-                
                 while (true)
                 {
                     numara = Yardimci.OgrenciNoKontrol();
@@ -678,18 +699,38 @@ namespace OkulYonetimUygulamasi
 
                     if (ogrenci == null)
                     {
-                        Console.WriteLine("Bu numaraya ait bir öğrenci bulunamadı. Tekrar deneyin.");
+                        Console.WriteLine("Bu numarada bir ögrenci yok. Tekrar deneyin.");
                         continue;
                     }
                     break;
                 }
                 Yardimci.OgrenciBilgiYazdir(ogrenci);
-
-                               
-                Console.Write("Not eklemek istediğiniz ders: ");
-                string ders = Console.ReadLine();
-                Console.Write("Eklemek istediginiz not adedi: ");
-                int adet = int.Parse(Console.ReadLine());
+                Console.WriteLine();
+                while (true)
+                {
+                    Console.Write("Not eklemek istediğiniz dersi giriniz: ");
+                     ders = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(ders) || int.TryParse(ders, out _))
+                    {
+                        Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin.");
+                        continue;
+                    }
+                    break;
+                }
+                while (true)
+                {
+                    Console.Write("Eklemek istediginiz not adedi: ");
+                    string? giris = Console.ReadLine();
+                    if (int.TryParse(giris, out _))
+                    {
+                        adet = int.Parse(giris);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Hatalı giriş yapıldı. Tekrar deneyin."); continue;
+                    }
+                }
 
                 for (int i = 1; i <= adet; i++)
                 {
@@ -700,20 +741,19 @@ namespace OkulYonetimUygulamasi
                         if (int.TryParse(Console.ReadLine(), out not) && not >= 0 && not <= 100)
                             break;
 
-                        Console.WriteLine("Geçersiz değer! Lütfen 0 ile 100 arasında bir sayı girin.");
+                        Console.WriteLine("Hatali giris yapildi. Tekrar deneyin");
                     }
                  
 
-                    okul.NotEkle(numara, ders, not);
+                    okul.NotEkle(numara, Yardimci.IlkHarfBuyut(ders), not);
                 }
-                Console.WriteLine("\nNot(lar) başarıyla eklendi.");
+                Console.WriteLine("\nBilgiler sisteme girilmistir.");
                 Yardimci.ListeCikis();
             }
             catch (Exception e)
             {
                 Console.WriteLine("\nHata: " + e.Message);
             }
-
         }
 
         public void SahteOgrenciEkle()
